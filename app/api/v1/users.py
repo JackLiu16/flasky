@@ -1,15 +1,15 @@
 from flask import jsonify, request, current_app, url_for
-from . import api
-from ..models import User, Post
+from app.api.v1 import api_v1
+from app.models import User, Post
 
 
-@api.route('/users/<int:id>')
+@api_v1.route('/users/<int:id>')
 def get_user(id):
     user = User.query.get_or_404(id)
     return jsonify(user.to_json())
 
 
-@api.route('/users/<int:id>/posts/')
+@api_v1.route('/users/<int:id>/posts/')
 def get_user_posts(id):
     user = User.query.get_or_404(id)
     page = request.args.get('page', 1, type=int)
@@ -19,10 +19,10 @@ def get_user_posts(id):
     posts = pagination.items
     prev = None
     if pagination.has_prev:
-        prev = url_for('api.get_user_posts', id=id, page=page-1)
+        prev = url_for('api_v1.get_user_posts', id=id, page=page-1)
     next = None
     if pagination.has_next:
-        next = url_for('api.get_user_posts', id=id, page=page+1)
+        next = url_for('api_v1.get_user_posts', id=id, page=page+1)
     return jsonify({
         'posts': [post.to_json() for post in posts],
         'prev': prev,
@@ -31,7 +31,7 @@ def get_user_posts(id):
     })
 
 
-@api.route('/users/<int:id>/timeline/')
+@api_v1.route('/users/<int:id>/timeline/')
 def get_user_followed_posts(id):
     user = User.query.get_or_404(id)
     page = request.args.get('page', 1, type=int)
@@ -41,10 +41,10 @@ def get_user_followed_posts(id):
     posts = pagination.items
     prev = None
     if pagination.has_prev:
-        prev = url_for('api.get_user_followed_posts', id=id, page=page-1)
+        prev = url_for('api_v1.get_user_followed_posts', id=id, page=page-1)
     next = None
     if pagination.has_next:
-        next = url_for('api.get_user_followed_posts', id=id, page=page+1)
+        next = url_for('api_v1.get_user_followed_posts', id=id, page=page+1)
     return jsonify({
         'posts': [post.to_json() for post in posts],
         'prev': prev,

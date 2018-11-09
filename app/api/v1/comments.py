@@ -1,11 +1,11 @@
 from flask import jsonify, request, g, url_for, current_app
-from .. import db
-from ..models import Post, Permission, Comment
-from . import api
+from app import db
+from app.models import Post, Permission, Comment
+from app.api.v1 import api_v1
 from .decorators import permission_required
 
 
-@api.route('/comments/')
+@api_v1.route('/comments/')
 def get_comments():
     page = request.args.get('page', 1, type=int)
     pagination = Comment.query.order_by(Comment.timestamp.desc()).paginate(
@@ -14,10 +14,10 @@ def get_comments():
     comments = pagination.items
     prev = None
     if pagination.has_prev:
-        prev = url_for('api.get_comments', page=page-1)
+        prev = url_for('api_v1.get_comments', page=page-1)
     next = None
     if pagination.has_next:
-        next = url_for('api.get_comments', page=page+1)
+        next = url_for('api_v1.get_comments', page=page+1)
     return jsonify({
         'comments': [comment.to_json() for comment in comments],
         'prev': prev,
@@ -26,13 +26,13 @@ def get_comments():
     })
 
 
-@api.route('/comments/<int:id>')
+@api_v1.route('/comments/<int:id>')
 def get_comment(id):
     comment = Comment.query.get_or_404(id)
     return jsonify(comment.to_json())
 
 
-@api.route('/posts/<int:id>/comments/')
+@api_v1.route('/posts/<int:id>/comments/')
 def get_post_comments(id):
     post = Post.query.get_or_404(id)
     page = request.args.get('page', 1, type=int)
@@ -42,10 +42,10 @@ def get_post_comments(id):
     comments = pagination.items
     prev = None
     if pagination.has_prev:
-        prev = url_for('api.get_post_comments', id=id, page=page-1)
+        prev = url_for('api_v1.get_post_comments', id=id, page=page-1)
     next = None
     if pagination.has_next:
-        next = url_for('api.get_post_comments', id=id, page=page+1)
+        next = url_for('api_v1.get_post_comments', id=id, page=page+1)
     return jsonify({
         'comments': [comment.to_json() for comment in comments],
         'prev': prev,
@@ -54,7 +54,7 @@ def get_post_comments(id):
     })
 
 
-@api.route('/posts/<int:id>/comments/', methods=['POST'])
+@api_v1.route('/posts/<int:id>/comments/', methods=['POST'])
 @permission_required(Permission.COMMENT)
 def new_post_comment(id):
     post = Post.query.get_or_404(id)
